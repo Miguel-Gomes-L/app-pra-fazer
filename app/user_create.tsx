@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { auth } from '../scripts/firebase-config'
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from '../scripts/firebase-config'
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'expo-router';
+import { set, ref } from 'firebase/database';
 
 export default function CreateUser() {
     const [nome, setNome] = useState("")
@@ -14,15 +15,19 @@ export default function CreateUser() {
     function userCreate(){
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-            // Signed up 
+                // Singed in
             const user = userCredential.user;
+            // Criar um novo usuário no banco de dados
+            set(ref(db, 'usuarios/' + user.uid), {
+                nome: nome,
+                email: email
+            });
             router.push('/');
         })
         .catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
             setErro(errorMessage);
-    // ..
         });
     }
     
